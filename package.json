@@ -1,0 +1,21 @@
+{
+  "name": "paytrust",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "db:mongo": "node --env-file=.env db/mongo_setup.mjs",
+    "db:analytics": "node --env-file=.env db/mongo_analytics.mjs"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "jose": "^6.2.13",
+    "mongodb": "^7.7.0",
+    "mysql2": "^3.24.6",
+    "next": "^16.4.3",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  }
+}
