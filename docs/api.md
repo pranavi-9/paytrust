@@ -85,3 +85,28 @@ Admin only. Header: `Idempotency-Key`. Request: `{ "decision": "release" | "refu
 - `201` `{ "caseId", "decision", "txnId", "replayed": false }`
 - `200` same body with `"replayed": true` when repeated (no money moves twice)
 - `403` not admin · `409` already resolved the other way, or escrow not disputed
+
+---
+
+## KYC (Member B)
+
+Documents live in MongoDB (`kyc_documents`); `users.kyc_status` in MySQL is recomputed from them after every change (verified if any document is verified, else pending if any is pending, else rejected).
+
+### `POST /api/kyc`
+Logged-in user (not admin). Request: `{ "doc_type": "pan", "last4": "123F", "file_url": "https://…" }`.
+`doc_type` is one of `aadhaar`, `pan`, `passport`, `driving_licence`, `voter_id`. Only the last 4 characters are sent; they are stored as a mask (`XXXXXX123F`). One document per type; a rejected one can be submitted again.
+- `201` `{ "status": "pending", "kycStatus": "pending" }` · `400` bad input · `409` that type is already pending or verified
+
+### `POST /api/admin/kyc/:id`
+Admin only. Request: `{ "decision": "verify" | "reject", "reason": "required when rejecting" }`.
+- `200` `{ "status", "kycStatus", "replayed" }` (`replayed: true` when the same decision is repeated) · `409` already decided the other way
+
+## Admin: users (Member B)
+
+### `POST /api/admin/users/:id/active`
+Admin only. Request: `{ "active": false }` freezes, `{ "active": true }` unfreezes. Admin accounts can't be frozen.
+A frozen user can still log in, but A's money procedures refuse every action for them and they can't be found as a transfer recipient.
+- `200` `{ "userId", "active" }` · `400` bad body · `404` no such user (or an admin)
+
+## Pages added in week 4
+`/transactions` (wallet history from the ledger, filter by type, paged) · `/profile` (account, KYC) · `/admin/users` and `/admin/users/:id` (search, KYC review, freeze) · `/admin/escrows` (all escrows, search, status filter, sort) · `/admin/analytics` (MySQL money stats incl. CTE + window-function ranking, MongoDB dispute and activity aggregations, time range filter)

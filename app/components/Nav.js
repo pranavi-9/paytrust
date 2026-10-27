@@ -10,6 +10,9 @@ export default function Nav({ session }) {
           {session.role === 'admin' ? (
             <>
               <Link href="/admin">Admin</Link>
+              <Link href="/admin/escrows">Escrows</Link>
+              <Link href="/admin/users">Users</Link>
+              <Link href="/admin/analytics">Analytics</Link>
               <Link href="/admin/reconciliation">Reconciliation</Link>
             </>
           ) : (
@@ -18,6 +21,8 @@ export default function Nav({ session }) {
               <Link href="/send">Send money</Link>
               <Link href="/escrows">Escrows</Link>
               <Link href="/disputes">Disputes</Link>
+              <Link href="/transactions">History</Link>
+              <Link href="/profile">Profile</Link>
             </>
           )}
         </nav>
