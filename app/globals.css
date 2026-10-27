@@ -135,3 +135,5 @@ td.num { font-variant-numeric: tabular-nums; }
   .badge.under_review { background: #2c2150; color: #c8b5ff; }
   .badge.resolved { background: #163a27; color: #8fe0b4; }
 }
+
+button.chip { background: var(--card); font: inherit; font-size: 14px; cursor: pointer; }
