@@ -4,6 +4,7 @@ import { getSession } from '@/lib/auth';
 import { query } from '@/lib/mysql';
 import { formatINR } from '@/lib/format';
 import Nav from '../components/Nav';
+import AddMoney from './AddMoney';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Dashboard · PayTrust' };
@@ -51,6 +52,7 @@ export default async function DashboardPage() {
         <div className="actions">
           <Link className="btn primary" href="/send">Send money</Link>
           <Link className="btn" href="/escrows">View all escrows</Link>
+          <AddMoney />
         </div>
 
         <h2>Recent escrows</h2>
