@@ -15,6 +15,7 @@ export default async function DashboardPage() {
   if (session.role === 'admin') redirect('/admin');
 
   const [wallet] = await query('SELECT id, balance FROM wallets WHERE user_id = ? LIMIT 1', [session.userId]);
+  const [me] = await query('SELECT is_active, kyc_status FROM users WHERE id = ?', [session.userId]);
 
   // My escrows, newest first, with the other party's name.
   const escrows = await query(
@@ -37,6 +38,17 @@ export default async function DashboardPage() {
       <main>
         <h1>Hi, {session.name.split(' ')[0]}</h1>
         <p className="muted">Here’s your wallet and recent escrows.</p>
+
+        {me && !me.is_active && (
+          <p className="card callout warn">
+            <strong>Your account is frozen.</strong> You can’t send, receive or move money until an admin unfreezes it.
+          </p>
+        )}
+        {me && me.is_active && me.kyc_status !== 'verified' && (
+          <p className="card callout">
+            Your identity isn’t verified yet. <Link href="/profile">Verify it on your profile</Link>.
+          </p>
+        )}
 
         <div className="stats">
           <div className="card stat">

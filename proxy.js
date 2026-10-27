@@ -4,7 +4,7 @@
 import { NextResponse } from 'next/server';
 import { SESSION_COOKIE, verifySessionToken } from './lib/session';
 
-const USER_PAGES = ['/dashboard', '/send', '/escrows', '/disputes'];
+const USER_PAGES = ['/dashboard', '/send', '/escrows', '/disputes', '/transactions', '/profile'];
 const ADMIN_PAGES = ['/admin'];
 const GUEST_PAGES = ['/login', '/register'];
 
@@ -35,5 +35,5 @@ export async function proxy(request) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/send/:path*', '/escrows/:path*', '/disputes/:path*', '/admin/:path*', '/login', '/register'],
+  matcher: ['/dashboard/:path*', '/send/:path*', '/escrows/:path*', '/disputes/:path*', '/transactions/:path*', '/profile/:path*', '/admin/:path*', '/login', '/register'],
 };
