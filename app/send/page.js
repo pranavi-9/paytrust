@@ -13,7 +13,7 @@ export default async function SendPage() {
   if (!session) redirect('/login');
   if (session.role === 'admin') redirect('/admin');
 
-  const [wallet] = await query('SELECT balance FROM wallets WHERE user_id = ? LIMIT 1', [session.userId]);
+  const [wallet] = await query("SELECT id, balance FROM wallets WHERE user_id = ? AND wallet_type = 'user' LIMIT 1", [session.userId]);
 
   return (
     <>
@@ -21,7 +21,7 @@ export default async function SendPage() {
       <main className="narrow">
         <h1>Send money</h1>
         <p className="muted">Available: {formatINR(wallet?.balance)}</p>
-        <SendForm />
+        <SendForm fromWalletId={String(wallet?.id ?? '')} />
       </main>
     </>
   );

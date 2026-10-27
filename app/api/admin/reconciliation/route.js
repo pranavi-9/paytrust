@@ -1,11 +1,11 @@
 import { withActor } from '@/lib/mysql';
 import { errorResponse, LedgerError } from '@/lib/ledger';
-import { getActorId } from '@/lib/dev-auth';   // TODO: swap for Member B's session helper
+import { getActorId } from '@/lib/auth';
 
 // GET /api/admin/reconciliation  (admin only)
 export async function GET(request) {
   try {
-    const actor = getActorId(request);
+    const actor = await getActorId();
     const data = await withActor(actor, async (conn) => {
       const [[u]] = await conn.query('SELECT role FROM users WHERE id=?', [actor]);
       if (!u || u.role !== 'admin') throw new LedgerError('FORBIDDEN', 'admin only', 403);
