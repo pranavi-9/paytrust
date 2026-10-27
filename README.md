@@ -33,6 +33,7 @@ mysql -u root -p paytrust < db/schema_escrow.sql    # Member B: escrows, escrow_
 mysql -u root -p paytrust < db/procedures.sql       # Member A: process_transfer, escrow procedures
 mysql -u root -p paytrust < db/triggers.sql         # Member B: escrow audit trigger
 mysql -u root -p paytrust < db/seed.sql             # Member B: demo users and escrows
+mysql -u root -p paytrust < db/seed_part2.sql       # Member A: demo money and escrow steps
 ```
 
 Run these as root (or another admin account). The app user above can't create tables or triggers, on purpose.

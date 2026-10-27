@@ -18,10 +18,11 @@ mysql -u root -p paytrust < db/schema.sql            # A: users, wallets, transa
 mysql -u root -p paytrust < db/schema_escrow.sql     # B: escrows, escrow_status_audit
 mysql -u root -p paytrust < db/procedures.sql        # A: stored procedures
 mysql -u root -p paytrust < db/triggers.sql          # B: escrow audit trigger
-mysql -u root -p paytrust < db/seed.sql              # B: demo data
+mysql -u root -p paytrust < db/seed.sql              # B: demo users and escrows
+mysql -u root -p paytrust < db/seed_part2.sql        # A: demo money and escrow steps
 npm run db:mongo                                     # Mongo collections, validators, indexes
 npm run db:analytics                                 # print dispute analytics
-node scripts/stress_test.js                          # A: concurrency stress test
+node --env-file=.env scripts/stress_test.mjs         # A: concurrency stress test
 ```
 
 (Update these paths if the repo layout changes.)
@@ -54,7 +55,9 @@ MongoDB collections: `dispute_cases`, `kyc_documents`, `activity_logs`
 - **Member A (Money Core):** ledger tables, view, `process_transfer`, escrow procedures, add-funds / transfer / escrow APIs, idempotency, reconciliation page, stress test.
 - **Member B (Users, Disputes, Interface):** escrow tables, audit trigger, seed data, Mongo setup and aggregation, auth, dispute API and resolution procedure, all other pages, admin analytics.
 
-Do not edit the other member's files without asking them. API request and response shapes are agreed in `docs/api.md`; update that file before changing an endpoint.
+Do not edit the other member's files without asking them. API request and response shapes are agreed in `docs/api.md` (auth, users, disputes) and `docs/api-ledger.md` (money and escrow); update the right file before changing an endpoint.
+
+API routes get the logged-in user from the session cookie: `requireApiSession()` for B's routes, `await getActorId()` for A's money routes (both in `lib/auth.js`). Money procedures manage their own transactions, so A's routes call them through `lib/ledger.js` (not inside `withActor`).
 
 ## Git
 

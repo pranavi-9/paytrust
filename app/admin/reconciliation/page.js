@@ -6,8 +6,7 @@ export default function ReconciliationPage() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // TODO: when Pranavi's login exists, remove the x-dev-user header
-    fetch('/api/admin/reconciliation', { headers: { 'x-dev-user': '101' } })
+    fetch('/api/admin/reconciliation')
       .then((r) => r.json().then((j) => (r.ok ? j : Promise.reject(j.error?.message || 'Failed'))))
       .then(setData)
       .catch((e) => setError(String(e)));

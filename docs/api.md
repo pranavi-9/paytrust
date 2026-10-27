@@ -41,24 +41,24 @@ const userId = auth.session.userId;
 
 ---
 
-## Money (Member A) — to build
+## Users (Member B)
 
-### `POST /api/wallet/add-funds`
-Headers: `Idempotency-Key`
-Request: `{ "amount": "1000.00" }`
-- `201` `{ "transaction_id": 12, "balance": "1500.00" }`
+### `GET /api/users/lookup?email=diya@paytrust.test`
+Logged-in users only. Finds a recipient for Send money.
+- `200` `{ "name": "Diya Patel", "walletId": "4" }`
+- `400` empty email or your own email · `404` no active user with that email
+- Errors use A's shape: `{ "error": { "code", "message" } }`
 
-### `POST /api/transfers`  (the Send money page already calls this)
-Headers: `Idempotency-Key`
-Request: `{ "to_email": "diya@example.com", "amount": "250.00", "note": "optional, max 140 chars" }`
-- `201` `{ "transaction_id": 13, "balance": "1250.00" }` (sender's new balance)
-- `404` recipient not found · `409` insufficient balance · `422` bad amount or sending to yourself
+---
 
-### Escrow actions (week 3) — A fills in
-`POST /api/escrows` (create), `POST /api/escrows/:id/fund`, `/complete`, `/release`
-Each money-moving action takes `Idempotency-Key` and returns `{ "escrow": { ...row } }`, or `409` with the reason if the state machine rejects the transition.
+## Money and escrow (Member A)
+
+See **`docs/api-ledger.md`**: add funds, transfer, escrow fund/complete/release/refund/dispute, reconciliation.
+Those routes return errors as `{ "error": { "code", "message" } }`, and get the user from the session through `getActorId()` in `lib/auth.js`.
 
 ---
 
 ## Disputes (Member B) — week 3
 `POST /api/disputes`, `POST /api/disputes/:id/evidence`, `POST /api/disputes/:id/messages`, `POST /api/disputes/:id/resolve` (admin). Shapes to be added here before building.
+
+Agreed with A: raising a dispute calls `CALL dispute_escrow(id)` as the buyer or seller, then stores the case in MongoDB. The admin decision calls `release_escrow` or `refund_escrow` as the admin (through `lib/ledger.js`).

@@ -23,7 +23,7 @@ export async function POST(request) {
 
   const errors = {};
   if (fullName.length < 2 || fullName.length > 100) errors.full_name = 'Enter your full name';
-  if (!EMAIL_RE.test(email) || email.length > 255) errors.email = 'Enter a valid email';
+  if (!EMAIL_RE.test(email) || email.length > 150) errors.email = 'Enter a valid email';
   if (password.length < 8) errors.password = 'Use at least 8 characters';
   else if (password.length > 72) errors.password = 'Use at most 72 characters';
   if (Object.keys(errors).length) {

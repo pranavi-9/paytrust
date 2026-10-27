@@ -6,10 +6,8 @@
 -- Every seeded user's password is:  Demo@1234   (bcrypt hash below)
 --
 -- This part moves NO money. It creates users, empty wallets and escrows
--- in 'created' status only. Balances and funded/released escrows must
--- come from A's procedures (add-funds, process_transfer, fund_escrow),
--- otherwise the ledger and wallet balances would not reconcile.
--- See the PART 2 block at the bottom; uncomment it once those exist.
+-- in 'created' status only. Balances and funded/released escrows come
+-- from A's procedures in db/seed_part2.sql, so the ledger reconciles.
 --
 -- Assumed columns in A's tables (adjust if A's schema differs):
 --   users  (id, full_name, email, password_hash, role)
@@ -45,18 +43,9 @@ INSERT INTO escrows (buyer_id, seller_id, amount, title, description) VALUES
 COMMIT;
 
 -- =====================================================================
--- PART 2 (uncomment when A's procedures are ready, check their names
--- and parameters first). Gives users balances through the ledger and
--- moves some escrows forward so the UI has every status to show.
+-- PART 2: demo money lives in Member A's db/seed_part2.sql. Run it next:
+--   mysql -u root -p paytrust < db/seed_part2.sql
+-- It tops up wallets through add_funds and moves escrows 1-3 through
+-- fund / complete / release / dispute, so every status has an example and
+-- the ledger reconciles to zero.
 -- =====================================================================
--- SET @app_user_id = 101;
--- CALL add_funds(102, 50000.00, 'seed-topup-102');
--- CALL add_funds(103, 20000.00, 'seed-topup-103');
--- CALL add_funds(104, 30000.00, 'seed-topup-104');
--- CALL add_funds(105, 15000.00, 'seed-topup-105');
--- CALL add_funds(106, 10000.00, 'seed-topup-106');
--- CALL process_transfer(<wallet of 102>, <wallet of 103>, 500.00, 'seed-transfer-1');
--- CALL fund_escrow(1, 'seed-fund-1');
--- CALL fund_escrow(2, 'seed-fund-2');
--- CALL release_escrow(1, 'seed-release-1');
--- SET @app_user_id = NULL;
