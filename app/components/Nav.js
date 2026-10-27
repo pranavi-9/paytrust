@@ -8,12 +8,16 @@ export default function Nav({ session }) {
         <Link href={session.role === 'admin' ? '/admin' : '/dashboard'} className="brand">PayTrust</Link>
         <nav>
           {session.role === 'admin' ? (
-            <Link href="/admin">Admin</Link>
+            <>
+              <Link href="/admin">Admin</Link>
+              <Link href="/admin/reconciliation">Reconciliation</Link>
+            </>
           ) : (
             <>
               <Link href="/dashboard">Dashboard</Link>
               <Link href="/send">Send money</Link>
               <Link href="/escrows">Escrows</Link>
+              <Link href="/disputes">Disputes</Link>
             </>
           )}
         </nav>

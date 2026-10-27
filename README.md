@@ -31,6 +31,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE ON paytrust.* TO 'paytrust_app'@'l
 mysql -u root -p paytrust < db/schema.sql           # Member A: users, wallets, transactions, ledger
 mysql -u root -p paytrust < db/schema_escrow.sql    # Member B: escrows, escrow_status_audit
 mysql -u root -p paytrust < db/procedures.sql       # Member A: process_transfer, escrow procedures
+mysql -u root -p paytrust < db/disputes.sql         # Member B: resolve_dispute procedure
 mysql -u root -p paytrust < db/triggers.sql         # Member B: escrow audit trigger
 mysql -u root -p paytrust < db/seed.sql             # Member B: demo users and escrows
 mysql -u root -p paytrust < db/seed_part2.sql       # Member A: demo money and escrow steps
@@ -42,6 +43,7 @@ Run these as root (or another admin account). The app user above can't create ta
 
 ```bash
 npm run db:mongo
+npm run db:mongo-seed     # demo dispute case for escrow 3 (run after seed_part2.sql)
 ```
 
 **5. Start the app**

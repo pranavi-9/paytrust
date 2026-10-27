@@ -40,7 +40,10 @@ export default async function EscrowsPage({ searchParams }) {
     <>
       <Nav session={session} />
       <main className="wide">
-        <h1>Escrows</h1>
+        <div className="page-head">
+          <h1>Escrows</h1>
+          <Link className="btn primary" href="/escrows/new">New escrow</Link>
+        </div>
         <div className="chips">
           {FILTERS.map((f) => (
             <Link key={f} href={f === 'all' ? '/escrows' : `/escrows?status=${f}`} className={`chip ${f === filter ? 'on' : ''}`}>
@@ -61,7 +64,7 @@ export default async function EscrowsPage({ searchParams }) {
                 {escrows.map((e) => (
                   <tr key={e.id}>
                     <td className="muted">{e.id}</td>
-                    <td>{e.title}</td>
+                    <td><Link href={`/escrows/${e.id}`}>{e.title}</Link></td>
                     <td>{e.my_role}</td>
                     <td>{e.other_party}</td>
                     <td className="num">{formatINR(e.amount)}</td>
