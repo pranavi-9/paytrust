@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "db:mongo": "node --env-file=.env db/mongo_setup.mjs",
-    "db:analytics": "node --env-file=.env db/mongo_analytics.mjs"
+    "db:analytics": "node --env-file=.env db/mongo_analytics.mjs",
+    "db:mongo-seed": "node --env-file=.env db/mongo_seed.mjs"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

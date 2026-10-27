@@ -17,10 +17,12 @@ npm run dev                                          # start Next.js on localhos
 mysql -u root -p paytrust < db/schema.sql            # A: users, wallets, transactions, ledger
 mysql -u root -p paytrust < db/schema_escrow.sql     # B: escrows, escrow_status_audit
 mysql -u root -p paytrust < db/procedures.sql        # A: stored procedures
+mysql -u root -p paytrust < db/disputes.sql          # B: resolve_dispute procedure
 mysql -u root -p paytrust < db/triggers.sql          # B: escrow audit trigger
 mysql -u root -p paytrust < db/seed.sql              # B: demo users and escrows
 mysql -u root -p paytrust < db/seed_part2.sql        # A: demo money and escrow steps
 npm run db:mongo                                     # Mongo collections, validators, indexes
+npm run db:mongo-seed                                # demo dispute case for escrow 3
 npm run db:analytics                                 # print dispute analytics
 node --env-file=.env scripts/stress_test.mjs         # A: concurrency stress test
 ```
@@ -31,7 +33,7 @@ node --env-file=.env scripts/stress_test.mjs         # A: concurrency stress tes
 
 MySQL tables: `users`, `wallets`, `transactions`, `ledger_entries`, `escrows`, `escrow_status_audit`
 - View: `wallet_balance_summary` (used for reconciliation)
-- Stored procedures: `process_transfer`, escrow fund / release / refund, dispute resolution
+- Stored procedures: `process_transfer`, escrow fund / complete / release / refund / dispute (A, `db/procedures.sql`); `resolve_dispute` (B, `db/disputes.sql`), the admin's decision on a disputed escrow
 - Trigger: escrow status audit, writes to `escrow_status_audit` on every status change. It records the acting user from the session variable `@app_user_id`, so any code that changes an escrow must go through `withActor(userId, fn)` in `lib/mysql.js`.
 - System wallets: escrow holding wallet, top-up source wallet
 

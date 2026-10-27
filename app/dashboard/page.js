@@ -66,7 +66,7 @@ export default async function DashboardPage() {
                 {escrows.map((e) => (
                   <tr key={e.id}>
                     <td className="muted">{e.id}</td>
-                    <td>{e.title}<div className="muted small-text">{e.my_role}</div></td>
+                    <td><Link href={`/escrows/${e.id}`}>{e.title}</Link><div className="muted small-text">{e.my_role}</div></td>
                     <td>{e.other_party}</td>
                     <td className="num">{formatINR(e.amount)}</td>
                     <td><span className={`badge ${e.status}`}>{e.status}</span></td>
