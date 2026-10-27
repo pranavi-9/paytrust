@@ -570,3 +570,111 @@ FOR EACH ROW
   SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'LEDGER_IMMUTABLE: transactions is append-only'$$
 
 DELIMITER ;
+
+-- =====================================================================
+-- create_escrow: a buyer opens a new escrow with a seller (no money moves;
+-- the buyer funds it later with fund_escrow).
+--   CALL create_escrow(seller_email, amount, title, description, idempotency_key)
+--   RESULT: SELECT escrow_id, replayed;
+-- Idempotent per buyer: the same key + same details returns the original
+-- escrow (replayed = 1); same key with different details is rejected.
+-- Errors: INVALID_INPUT (bad amount/title, unknown seller, seller = buyer),
+--         FORBIDDEN (no actor, frozen account, admin), IDEMPOTENCY_CONFLICT
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS escrow_create_requests (
+  buyer_id        BIGINT UNSIGNED NOT NULL,
+  idempotency_key VARCHAR(64)     NOT NULL,
+  seller_id       BIGINT UNSIGNED NOT NULL,
+  amount          DECIMAL(15,2)   NOT NULL,
+  title           VARCHAR(120)    NOT NULL,
+  escrow_id       BIGINT UNSIGNED NOT NULL,
+  created_at      DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (buyer_id, idempotency_key),
+  UNIQUE KEY uq_create_req_escrow (escrow_id),
+  CONSTRAINT fk_create_req_buyer  FOREIGN KEY (buyer_id)  REFERENCES users(id),
+  CONSTRAINT fk_create_req_seller FOREIGN KEY (seller_id) REFERENCES users(id),
+  CONSTRAINT fk_create_req_escrow FOREIGN KEY (escrow_id) REFERENCES escrows(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS create_escrow$$
+CREATE PROCEDURE create_escrow(
+  IN p_seller_email VARCHAR(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  IN p_amount       DECIMAL(15,2),
+  IN p_title        VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  IN p_description  VARCHAR(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  IN p_key          VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+)
+BEGIN
+  DECLARE v_actor BIGINT UNSIGNED;
+  DECLARE v_admin TINYINT;
+  DECLARE v_seller BIGINT UNSIGNED DEFAULT NULL;
+  DECLARE v_seller_active TINYINT DEFAULT NULL;
+  DECLARE v_title VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+  DECLARE v_desc  VARCHAR(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+  DECLARE v_escrow BIGINT UNSIGNED DEFAULT NULL;
+  DECLARE v_ex_escrow BIGINT UNSIGNED DEFAULT NULL;
+  DECLARE v_ex_seller BIGINT UNSIGNED DEFAULT NULL;
+  DECLARE v_ex_amount DECIMAL(15,2) DEFAULT NULL;
+  DECLARE v_ex_title  VARCHAR(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL;
+  DECLARE v_replayed TINYINT DEFAULT 0;
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; RESIGNAL; END;
+
+  CALL _require_actor(v_actor, v_admin);
+  IF v_admin THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'FORBIDDEN: admins cannot create escrows';
+  END IF;
+  IF p_key IS NULL OR CHAR_LENGTH(TRIM(p_key)) = 0 THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'INVALID_INPUT: idempotency key is required';
+  END IF;
+  IF p_amount IS NULL OR p_amount <= 0 THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'INVALID_INPUT: amount must be greater than zero';
+  END IF;
+  SET v_title = TRIM(p_title);
+  IF v_title IS NULL OR CHAR_LENGTH(v_title) < 3 OR CHAR_LENGTH(v_title) > 120 THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'INVALID_INPUT: title must be 3 to 120 characters';
+  END IF;
+  SET v_desc = NULLIF(TRIM(p_description), '');
+  IF v_desc IS NOT NULL AND CHAR_LENGTH(v_desc) > 1000 THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'INVALID_INPUT: details must be at most 1000 characters';
+  END IF;
+
+  SELECT id, is_active INTO v_seller, v_seller_active
+    FROM users WHERE email = LOWER(TRIM(p_seller_email)) AND role = 'user';
+  IF v_seller IS NULL OR v_seller_active = 0 THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'INVALID_INPUT: no PayTrust user with that email';
+  END IF;
+  IF v_seller = v_actor THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'INVALID_INPUT: you cannot create an escrow with yourself';
+  END IF;
+
+  SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+  START TRANSACTION;
+
+  -- Serialise this buyer's requests so two identical retries cannot both insert.
+  SELECT id INTO v_actor FROM users WHERE id = v_actor FOR UPDATE;
+
+  SELECT escrow_id, seller_id, amount, title INTO v_ex_escrow, v_ex_seller, v_ex_amount, v_ex_title
+    FROM escrow_create_requests WHERE buyer_id = v_actor AND idempotency_key = p_key FOR UPDATE;
+
+  IF v_ex_escrow IS NOT NULL THEN
+    IF v_ex_seller = v_seller AND v_ex_amount = p_amount AND v_ex_title = v_title THEN
+      SET v_escrow = v_ex_escrow;
+      SET v_replayed = 1;
+    ELSE
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'IDEMPOTENCY_CONFLICT: key was already used for a different escrow';
+    END IF;
+  ELSE
+    INSERT INTO escrows (buyer_id, seller_id, amount, title, description)
+    VALUES (v_actor, v_seller, p_amount, v_title, v_desc);
+    SET v_escrow = LAST_INSERT_ID();
+    INSERT INTO escrow_create_requests (buyer_id, idempotency_key, seller_id, amount, title, escrow_id)
+    VALUES (v_actor, p_key, v_seller, p_amount, v_title, v_escrow);
+  END IF;
+
+  COMMIT;
+  SELECT v_escrow AS escrow_id, v_replayed AS replayed;
+END$$
+
+DELIMITER ;

@@ -1,47 +1,80 @@
-'use client';
-import { useEffect, useState } from 'react';
+import { redirect } from 'next/navigation';
+import { getSession } from '@/lib/auth';
+import { formatINR } from '@/lib/format';
+import { getReconciliation } from '@/lib/reconciliation';
+import Nav from '../../components/Nav';
 
-export default function ReconciliationPage() {
-  const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
+export const dynamic = 'force-dynamic';
+export const metadata = { title: 'Reconciliation · PayTrust' };
 
-  useEffect(() => {
-    fetch('/api/admin/reconciliation')
-      .then((r) => r.json().then((j) => (r.ok ? j : Promise.reject(j.error?.message || 'Failed'))))
-      .then(setData)
-      .catch((e) => setError(String(e)));
-  }, []);
+const TYPE_LABEL = { user: 'User wallet', escrow: 'Escrow holding', topup: 'Top-up source' };
 
-  if (error) return <p style={{ padding: 24, color: 'crimson' }}>Error: {error}</p>;
-  if (!data) return <p style={{ padding: 24 }}>Loading…</p>;
+export default async function ReconciliationPage() {
+  const session = await getSession();
+  if (!session) redirect('/login');
+  if (session.role !== 'admin') redirect('/dashboard'); // second guard after proxy.js
+
+  const r = await getReconciliation();
 
   return (
-    <main style={{ padding: 24, maxWidth: 900, margin: '0 auto' }}>
-      <h1>Ledger reconciliation</h1>
-      <p style={{
-        display: 'inline-block', padding: '6px 14px', borderRadius: 6, color: 'white',
-        background: data.healthy ? '#15803d' : '#b91c1c'
-      }}>
-        {data.healthy ? 'Healthy: ledger matches every wallet' : 'Mismatch found'}
-      </p>
-      <ul>
-        <li>Wallets with a mismatch: {data.mismatchedWallets}</li>
-        <li>Unbalanced transactions: {data.unbalancedTransactions}</li>
-        <li>Sum of all balances (must be 0.00): {data.sumOfAllBalances}</li>
-      </ul>
-      <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse', width: '100%' }}>
-        <thead>
-          <tr><th>Wallet</th><th>Type</th><th>User</th><th>Cached</th><th>From ledger</th><th>Difference</th></tr>
-        </thead>
-        <tbody>
-          {data.wallets.map((w) => (
-            <tr key={w.wallet_id} style={{ background: w.difference === '0.00' ? 'transparent' : '#fee2e2' }}>
-              <td>{w.wallet_id}</td><td>{w.wallet_type}</td><td>{w.user_id ?? '—'}</td>
-              <td>{w.cached_balance}</td><td>{w.ledger_derived_balance}</td><td>{w.difference}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </main>
+    <>
+      <Nav session={session} />
+      <main className="wide">
+        <div className="page-head">
+          <div>
+            <h1>Ledger reconciliation</h1>
+            <p className="muted" style={{ margin: 0 }}>
+              Every wallet’s stored balance is checked against the sum of its ledger entries.
+            </p>
+          </div>
+          <span className={`badge ${r.healthy ? 'released' : 'disputed'}`}>
+            {r.healthy ? 'Healthy' : 'Mismatch found'}
+          </span>
+        </div>
+
+        <div className="stats" style={{ marginTop: 16 }}>
+          <div className="card stat">
+            <span className="muted">Wallets out of balance</span>
+            <strong className={r.mismatchedWallets === 0 ? 'ok' : 'bad'}>{r.mismatchedWallets}</strong>
+          </div>
+          <div className="card stat">
+            <span className="muted">Unbalanced transactions</span>
+            <strong className={r.unbalancedTransactions === 0 ? 'ok' : 'bad'}>{r.unbalancedTransactions}</strong>
+          </div>
+          <div className="card stat">
+            <span className="muted">Sum of all balances (must be ₹0.00)</span>
+            <strong className={Number(r.sumOfAllBalances) === 0 ? 'ok' : 'bad'}>{formatINR(r.sumOfAllBalances)}</strong>
+          </div>
+        </div>
+
+        <h2>Wallets</h2>
+        <div className="card table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Wallet</th><th>Owner</th><th>Stored balance</th><th>From ledger</th><th>Difference</th>
+              </tr>
+            </thead>
+            <tbody>
+              {r.wallets.map((w) => {
+                const ok = Number(w.difference) === 0;
+                return (
+                  <tr key={w.wallet_id}>
+                    <td>#{w.wallet_id} <span className="muted">· {TYPE_LABEL[w.wallet_type] ?? w.wallet_type}</span></td>
+                    <td>{w.full_name ?? <span className="muted">system</span>}</td>
+                    <td className="num">{formatINR(w.cached_balance)}</td>
+                    <td className="num">{formatINR(w.ledger_derived_balance)}</td>
+                    <td className={`num ${ok ? 'ok' : 'bad'}`}>{formatINR(w.difference)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <p className="muted small-text">
+          The top-up wallet is negative by design: it is where simulated deposits come from, so all wallets together always add up to zero.
+        </p>
+      </main>
+    </>
   );
 }
