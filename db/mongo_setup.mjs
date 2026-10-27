@@ -9,6 +9,7 @@
 // (escrow_id, user_id); the ledger in MySQL stays the source of truth.
 // =====================================================================
 import { MongoClient } from 'mongodb';
+import { pathToFileURL } from 'node:url';
 
 const uri = process.env.MONGODB_URI;
 const dbName = process.env.MONGODB_DB || 'paytrust';
@@ -160,7 +161,8 @@ export async function setup(db) {
 }
 
 // Run directly (not when imported by a test).
-if (import.meta.url === `file://${process.argv[1]}`) {
+// pathToFileURL handles Windows drive letters, backslashes and spaces.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const client = new MongoClient(uri);
   try {
     await client.connect();
