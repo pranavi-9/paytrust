@@ -1,0 +1,27 @@
+id,full_name,email,password_hash,role,kyc_status,is_active,created_at
+101,Admin User,admin@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,admin,pending,1,2026-11-03 03:14:22.623
+102,Aarav Sharma,aarav@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,verified,1,2026-11-03 03:14:22.623
+103,Diya Patel,diya@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,verified,1,2026-11-03 03:14:22.623
+104,Kabir Rao,kabir@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,verified,1,2026-11-03 03:14:22.623
+105,Meera Iyer,meera@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,pending,1,2026-11-03 03:14:22.623
+106,Rohan Gupta,rohan@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,rejected,1,2026-11-03 03:14:22.623
+201,Ananya Nair,ananya@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,verified,1,2026-11-03 03:14:22.637
+202,Vikram Singh,vikram@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,verified,1,2026-11-03 03:14:22.637
+203,Ishita Menon,ishita@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,verified,1,2026-11-03 03:14:22.637
+204,Arjun Reddy,arjun@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,pending,1,2026-11-03 03:14:22.637
+205,Sneha Kulkarni,sneha@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,verified,1,2026-11-03 03:14:22.637
+206,Rahul Verma,rahul@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,verified,1,2026-11-03 03:14:22.637
+207,Pooja Bhat,pooja@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,verified,1,2026-11-03 03:14:22.637
+208,Nikhil Joshi,nikhil@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,rejected,1,2026-11-03 03:14:22.637
+209,Tanvi Desai,tanvi@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,verified,1,2026-11-03 03:14:22.637
+210,Aditya Kapoor,aditya@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,verified,1,2026-11-03 03:14:22.637
+211,Kavya Pillai,kavya@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,verified,1,2026-11-03 03:14:22.637
+212,Siddharth Das,siddharth@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,pending,1,2026-11-03 03:14:22.637
+213,Riya Malhotra,riya@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,verified,1,2026-11-03 03:14:22.637
+214,Harsh Agarwal,harsh@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,verified,1,2026-11-03 03:14:22.637
+215,Neha Chopra,neha@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,verified,1,2026-11-03 03:14:22.637
+216,Manav Shah,manav@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,rejected,1,2026-11-03 03:14:22.637
+217,Sanya Gill,sanya@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,verified,1,2026-11-03 03:14:22.637
+218,Yash Pandey,yash@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,verified,1,2026-11-03 03:14:22.637
+219,Aisha Khan,aisha@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,verified,1,2026-11-03 03:14:22.637
+220,Dev Mehta,dev@paytrust.test,$2b$10$ADVzfSg9ulxwhZikOB4OEu67CSTCFYDBEWr6Bw.FMEx4rFUU9Ub8y,user,pending,0,2026-11-03 03:14:22.637
