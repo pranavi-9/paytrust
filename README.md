@@ -133,10 +133,31 @@ scripts/
 
 ```bash
 npm run db:analytics   # print dispute analytics from MongoDB
-node --env-file=.env scripts/stress_test.mjs   # concurrency stress test
 ```
 
-Run the stress test against a separate database (the ledger is append-only, so test rows cannot be deleted): create `paytrust_test`, load `schema.sql`, `schema_escrow.sql`, `procedures.sql`, `disputes.sql` and `triggers.sql` into it, and point `MYSQL_DATABASE` at it for that run. You want `ALL CHECKS PASSED` at the end.
+**Concurrency stress test.** Run it against a separate database, because the ledger is append-only and test rows can never be deleted. The script refuses to run against the real `paytrust` database.
+
+```bash
+mysql -u root -p -e "CREATE DATABASE paytrust_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+mysql -u root -p paytrust_test < db/schema.sql
+mysql -u root -p paytrust_test < db/schema_escrow.sql
+mysql -u root -p paytrust_test < db/procedures.sql
+mysql -u root -p paytrust_test < db/disputes.sql
+mysql -u root -p paytrust_test < db/triggers.sql
+```
+
+(Also `GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE ON paytrust_test.* TO 'paytrust_app'@'localhost';` if you use the app user from `.env`.) Then run it with the user and password from `.env`:
+
+```bash
+# Windows cmd
+set DB_NAME=paytrust_test
+node --env-file=.env scripts/stress_test.mjs
+
+# Mac / Linux
+DB_NAME=paytrust_test node --env-file=.env scripts/stress_test.mjs
+```
+
+You want `ALL CHECKS PASSED` at the end.
 
 ## Troubleshooting
 
