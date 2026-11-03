@@ -1,19 +1,34 @@
-// PayTrust stress test (Member A).  Run:  node scripts/stress_test.mjs
-// Use a SEPARATE database (ledger is append-only, test rows can't be deleted):
-//   DB_NAME=paytrust_test DB_USER=... DB_PASSWORD=... node scripts/stress_test.mjs
+// PayTrust stress test (Member A).  Run against a SEPARATE test database
+// (the ledger is append-only, so test rows can never be deleted):
+//
+//   mysql -u root -p -e "CREATE DATABASE paytrust_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+//   (load schema.sql, schema_escrow.sql, procedures.sql, disputes.sql, triggers.sql into it)
+//   Windows cmd:   set DB_NAME=paytrust_test
+//                  node --env-file=.env scripts/stress_test.mjs
+//   Mac/Linux:     DB_NAME=paytrust_test node --env-file=.env scripts/stress_test.mjs
+//
+// Connection settings come from DB_* variables if set, otherwise from the
+// MYSQL_* variables in .env. The test refuses to run against the real
+// `paytrust` database unless you pass --allow-main-db.
 // Proves: no lost updates, no deadlocks, idempotency under races, no overdraft,
 // ledger always reconciles, SUM(all balances) = 0.
 import mysql from 'mysql2/promise';
 import crypto from 'node:crypto';
 
+const env = process.env;
 const cfg = {
-  host: process.env.DB_HOST || '127.0.0.1',
-  port: Number(process.env.DB_PORT || 3306),
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'paytrust',
-  socketPath: process.env.DB_SOCKET || undefined,
+  host: env.DB_HOST || env.MYSQL_HOST || '127.0.0.1',
+  port: Number(env.DB_PORT || env.MYSQL_PORT || 3306),
+  user: env.DB_USER || env.MYSQL_USER || 'root',
+  password: env.DB_PASSWORD ?? env.MYSQL_PASSWORD ?? '',
+  database: env.DB_NAME || env.MYSQL_DATABASE || 'paytrust',
+  socketPath: env.DB_SOCKET || undefined,
 };
+if (cfg.database === 'paytrust' && !process.argv.includes('--allow-main-db')) {
+  console.error('Refusing to run against the real "paytrust" database (it would add test users and money).');
+  console.error('Use a test database:  set DB_NAME=paytrust_test   (see the top of this file).');
+  process.exit(2);
+}
 const pool = mysql.createPool({ ...cfg, connectionLimit: 40 });
 let failed = 0;
 const check = (name, ok, extra = '') => {
